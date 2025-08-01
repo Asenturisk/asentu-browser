@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ArrowLeft, ArrowRight, RotateCcw, Home, Shield, Settings, Maximize, Menu } from 'lucide-react';
+import { Search, ArrowLeft, ArrowRight, RotateCcw, Home, Shield, Settings, Maximize, Menu, Star, Download, BookOpen, Clock } from 'lucide-react';
 import BrowserFrame from './components/BrowserFrame';
 import AddressBar from './components/AddressBar';
 import ProgressBar from './components/ProgressBar';
 import PWAInstaller from './components/PWAInstaller';
+import BookmarkManager from './components/BookmarkManager';
+import HistoryManager from './components/HistoryManager';
+import DownloadManager from './components/DownloadManager';
 import { translateAsnDomain } from './utils/domainTranslator';
 
 function App() {
@@ -17,6 +20,12 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showDownloads, setShowDownloads] = useState(false);
+  const [bookmarks, setBookmarks] = useState<Array<{url: string, title: string, favicon?: string}>>([]);
+  const [pageTitle, setPageTitle] = useState('');
+  const [favicon, setFavicon] = useState('');
 
   useEffect(() => {
     const checkMobile = () => {
@@ -143,6 +152,17 @@ function App() {
     handleNavigate('asenturisk.asn');
   }, []);
 
+  const addBookmark = () => {
+    const bookmark = {
+      url: displayUrl,
+      title: pageTitle || displayUrl,
+      favicon: favicon
+    };
+    setBookmarks(prev => [...prev, bookmark]);
+  };
+
+  const isBookmarked = bookmarks.some(b => b.url === displayUrl);
+
   if (isMobile) {
     return (
       <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col">
@@ -203,6 +223,18 @@ function App() {
                 >
                   <Home size={16} />
                 </button>
+                <button
+                  onClick={() => setShowBookmarks(!showBookmarks)}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+                >
+                  <BookOpen size={16} />
+                </button>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+                >
+                  <Clock size={16} />
+                </button>
                 <button 
                   onClick={toggleFullscreen}
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
@@ -222,6 +254,10 @@ function App() {
             isLoading={isLoading}
             onLoadStart={() => setIsLoading(true)}
             onLoadEnd={() => setIsLoading(false)}
+            onTitleChange={setPageTitle}
+            onFaviconChange={setFavicon}
+            onTitleChange={setPageTitle}
+            onFaviconChange={setFavicon}
           />
         </div>
 
@@ -288,6 +324,35 @@ function App() {
 
           {/* Right Controls */}
           <div className="flex items-center gap-2">
+            <button 
+              onClick={addBookmark}
+              disabled={isBookmarked}
+              className={`p-1.5 rounded-lg transition-all duration-200 ${
+                isBookmarked 
+                  ? 'bg-yellow-500/20 text-yellow-400' 
+                  : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+              }`}
+            >
+              <Star size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
+            </button>
+            <button 
+              onClick={() => setShowBookmarks(!showBookmarks)}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+            >
+              <BookOpen size={16} />
+            </button>
+            <button 
+              onClick={() => setShowHistory(!showHistory)}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+            >
+              <Clock size={16} />
+            </button>
+            <button 
+              onClick={() => setShowDownloads(!showDownloads)}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+            >
+              <Download size={16} />
+            </button>
             <button className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white">
               <Shield size={16} />
             </button>
@@ -320,6 +385,40 @@ function App() {
 
       {/* PWA Installer */}
       <PWAInstaller />
+
+      {/* Bookmark Manager */}
+      {showBookmarks && (
+        <BookmarkManager
+          bookmarks={bookmarks}
+          onClose={() => setShowBookmarks(false)}
+          onNavigate={(url) => {
+            handleNavigate(url);
+            setShowBookmarks(false);
+          }}
+          onDelete={(index) => {
+            setBookmarks(prev => prev.filter((_, i) => i !== index));
+          }}
+        />
+      )}
+
+      {/* History Manager */}
+      {showHistory && (
+        <HistoryManager
+          history={history}
+          onClose={() => setShowHistory(false)}
+          onNavigate={(url) => {
+            handleNavigate(url);
+            setShowHistory(false);
+          }}
+        />
+      )}
+
+      {/* Download Manager */}
+      {showDownloads && (
+        <DownloadManager
+          onClose={() => setShowDownloads(false)}
+        />
+      )}
     </div>
   );
 }

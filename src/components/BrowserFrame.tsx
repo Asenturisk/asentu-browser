@@ -6,15 +6,36 @@ interface BrowserFrameProps {
   isLoading: boolean;
   onLoadStart: () => void;
   onLoadEnd: () => void;
+  onTitleChange?: (title: string) => void;
+  onFaviconChange?: (favicon: string) => void;
 }
 
 const BrowserFrame = forwardRef<HTMLIFrameElement, BrowserFrameProps>(
-  ({ url, isLoading, onLoadStart, onLoadEnd }, ref) => {
+  ({ url, isLoading, onLoadStart, onLoadEnd, onTitleChange, onFaviconChange }, ref) => {
     const [hasError, setHasError] = useState(false);
 
     const handleLoad = () => {
       onLoadEnd();
       setHasError(false);
+      
+      // Try to get page title and favicon
+      try {
+        const iframe = ref as React.RefObject<HTMLIFrameElement>;
+        if (iframe.current?.contentDocument) {
+          const title = iframe.current.contentDocument.title;
+          if (title && onTitleChange) {
+            onTitleChange(title);
+          }
+          
+          const favicon = iframe.current.contentDocument.querySelector('link[rel*="icon"]') as HTMLLinkElement;
+          if (favicon?.href && onFaviconChange) {
+            onFaviconChange(favicon.href);
+          }
+        }
+      } catch (error) {
+        // Cross-origin restrictions prevent access to iframe content
+        console.log('Cannot access iframe content due to CORS policy');
+      }
     };
 
     const handleError = () => {
@@ -51,7 +72,7 @@ const BrowserFrame = forwardRef<HTMLIFrameElement, BrowserFrameProps>(
           className="w-full h-full border-0"
           onLoad={handleLoad}
           onError={handleError}
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-top-navigation-by-user-activation allow-downloads"
           title="Browser Content"
           referrerPolicy="no-referrer-when-downgrade"
         />
