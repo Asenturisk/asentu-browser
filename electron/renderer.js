@@ -19,9 +19,9 @@ const securityIcon = document.getElementById('securityIcon');
 
 // State
 let currentUrl = 'https://asenturisk.github.io/asn/';
-let displayUrl = 'asenturisk.asn';
+let displayUrl = 'hello.asn';
 let isLoading = false;
-let history = ['asenturisk.asn'];
+let history = ['hello.asn'];
 let historyIndex = 0;
 let bookmarks = [];
 
@@ -45,7 +45,7 @@ async function init() {
     updateNavigationButtons();
     
     // Navigate to home page
-    await handleNavigate('asenturisk.asn');
+    await handleNavigate('hello.asn');
 }
 
 // URL validation
@@ -191,7 +191,7 @@ function handleReload() {
 }
 
 function handleHome() {
-    handleNavigate('asenturisk.asn');
+    handleNavigate('hello.asn');
 }
 
 function updateNavigationButtons() {

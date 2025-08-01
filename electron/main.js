@@ -75,6 +75,7 @@ async function fetchDomainMappings() {
     return {
       "trend.asn": "https://trend.muxday.com/",
       "asenturisk.asn": "https://asenturisk.web.app/",
+      "hello.asn": "https://asenturisk.github.io/asn/",
       "mukto.asn": "https://muxday.com/mukto/"
     };
   }

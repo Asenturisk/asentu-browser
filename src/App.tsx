@@ -13,7 +13,7 @@ function App() {
   const [currentUrl, setCurrentUrl] = useState('https://asenturisk.github.io/asn/');
   const [displayUrl, setDisplayUrl] = useState('hello.asn');
   const [isLoading, setIsLoading] = useState(false);
-  const [history, setHistory] = useState<string[]>(['asenturisk.asn']);
+  const [history, setHistory] = useState<string[]>(['hello.asn']);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isSecure, setIsSecure] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -125,7 +125,7 @@ function App() {
   };
 
   const handleHome = () => {
-    handleNavigate('asenturisk.asn');
+    handleNavigate('hello.asn');
   };
 
   const toggleFullscreen = () => {
@@ -149,7 +149,7 @@ function App() {
 
   useEffect(() => {
     // Initialize with home page
-    handleNavigate('asenturisk.asn');
+    handleNavigate('hello.asn');
   }, []);
 
   const addBookmark = () => {
