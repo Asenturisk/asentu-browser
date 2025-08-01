@@ -1,4 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
+import { useEffect } from 'react';
 import { Search, Lock, AlertTriangle, Globe } from 'lucide-react';
 
 interface AddressBarProps {
@@ -11,22 +12,26 @@ const AddressBar: React.FC<AddressBarProps> = ({ url, isSecure, onNavigate }) =>
   const [inputValue, setInputValue] = useState(url);
   const [isFocused, setIsFocused] = useState(false);
 
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(url);
+    }
+  }, [url, isFocused]);
+
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       onNavigate(inputValue);
+      (e.target as HTMLInputElement).blur();
     }
   };
 
   const handleFocus = () => {
     setIsFocused(true);
-    setInputValue(url);
   };
 
   const handleBlur = () => {
     setIsFocused(false);
-    if (inputValue === '') {
-      setInputValue(url);
-    }
   };
 
   const getSecurityIcon = () => {

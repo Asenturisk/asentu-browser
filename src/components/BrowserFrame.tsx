@@ -51,8 +51,9 @@ const BrowserFrame = forwardRef<HTMLIFrameElement, BrowserFrameProps>(
           className="w-full h-full border-0"
           onLoad={handleLoad}
           onError={handleError}
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
           title="Browser Content"
+          referrerPolicy="no-referrer-when-downgrade"
         />
       </div>
     );
