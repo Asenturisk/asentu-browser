@@ -11,7 +11,7 @@ import { translateAsnDomain } from './utils/domainTranslator';
 
 function App() {
   const [currentUrl, setCurrentUrl] = useState('https://asenturisk.github.io/asn/');
-  const [displayUrl, setDisplayUrl] = useState('asenturisk.asn');
+  const [displayUrl, setDisplayUrl] = useState('hello.asn');
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<string[]>(['asenturisk.asn']);
   const [historyIndex, setHistoryIndex] = useState(0);
@@ -413,12 +413,6 @@ function App() {
         />
       )}
 
-      {/* Download Manager */}
-      {showDownloads && (
-        <DownloadManager
-          onClose={() => setShowDownloads(false)}
-        />
-      )}
     </div>
   );
 }
