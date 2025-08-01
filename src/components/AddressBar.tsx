@@ -58,7 +58,7 @@ const AddressBar: React.FC<AddressBarProps> = ({ url, isSecure, onNavigate }) =>
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder="Search or enter address"
-        className="flex-1 bg-transparent text-white placeholder-white/50 px-2 py-3 focus:outline-none text-sm font-medium"
+        className="flex-1 bg-transparent text-white placeholder-white/50 px-2 py-2 focus:outline-none text-sm font-medium"
       />
 
       {/* Search Icon */}

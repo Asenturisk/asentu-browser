@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ArrowLeft, ArrowRight, RotateCcw, Home, Shield, Settings } from 'lucide-react';
+import { Search, ArrowLeft, ArrowRight, RotateCcw, Home, Shield, Settings, Maximize } from 'lucide-react';
 import BrowserFrame from './components/BrowserFrame';
 import AddressBar from './components/AddressBar';
 import ProgressBar from './components/ProgressBar';
+import PWAInstaller from './components/PWAInstaller';
 import { translateAsnDomain } from './utils/domainTranslator';
 
 function App() {
@@ -12,7 +13,17 @@ function App() {
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
   const [isSecure, setIsSecure] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const isValidUrl = (string: string) => {
+    try {
+      new URL(string.startsWith('http') ? string : `https://${string}`);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
 
   const handleNavigate = async (url: string) => {
     setIsLoading(true);
@@ -31,12 +42,18 @@ function App() {
           setDisplayUrl(url);
           setIsSecure(false);
         }
-      } else {
-        // Regular URL
+      } else if (isValidUrl(url) || url.includes('.')) {
+        // Regular URL or domain
         const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
         setCurrentUrl(formattedUrl);
         setDisplayUrl(url);
         setIsSecure(formattedUrl.startsWith('https://'));
+      } else {
+        // Search query - use Google
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+        setCurrentUrl(searchUrl);
+        setDisplayUrl(`Search: ${url}`);
+        setIsSecure(true);
       }
     } catch (error) {
       console.error('Navigation error:', error);
@@ -74,6 +91,25 @@ function App() {
     handleNavigate('asenturisk.asn');
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   useEffect(() => {
     // Initialize with home page
     handleNavigate('asenturisk.asn');
@@ -82,16 +118,13 @@ function App() {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col">
       {/* Header */}
-      <div className="bg-black/20 backdrop-blur-lg border-b border-cyan-500/20 px-4 py-3">
+      <div className="bg-black/20 backdrop-blur-lg border-b border-cyan-500/20 px-4 py-2">
         <div className="flex items-center gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-sm opacity-90"></div>
-            </div>
-            <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500" 
+          <div className="flex items-center">
+            <h1 className="text-xl font-black text-white" 
                 style={{ fontFamily: 'Orbitron, monospace' }}>
-              ASENTU
+              Asentu
             </h1>
           </div>
 
@@ -100,28 +133,28 @@ function App() {
             <button
               onClick={handleGoBack}
               disabled={!canGoBack}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-white/70 hover:text-white"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-white/70 hover:text-white"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={16} />
             </button>
             <button
               onClick={handleGoForward}
               disabled={!canGoForward}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-white/70 hover:text-white"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-white/70 hover:text-white"
             >
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </button>
             <button
               onClick={handleReload}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
             >
-              <RotateCcw size={18} />
+              <RotateCcw size={16} />
             </button>
             <button
               onClick={handleHome}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
             >
-              <Home size={18} />
+              <Home size={16} />
             </button>
           </div>
 
@@ -136,11 +169,17 @@ function App() {
 
           {/* Right Controls */}
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white">
-              <Shield size={18} />
+            <button className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white">
+              <Shield size={16} />
             </button>
-            <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white">
-              <Settings size={18} />
+            <button 
+              onClick={toggleFullscreen}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white"
+            >
+              <Maximize size={16} />
+            </button>
+            <button className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200 text-white/70 hover:text-white">
+              <Settings size={16} />
             </button>
           </div>
         </div>
@@ -159,6 +198,9 @@ function App() {
 
       {/* Progress Bar */}
       <ProgressBar isLoading={isLoading} />
+
+      {/* PWA Installer */}
+      <PWAInstaller />
     </div>
   );
 }
